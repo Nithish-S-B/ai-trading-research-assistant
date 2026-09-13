@@ -11,7 +11,7 @@ const GEMINI_TIMEOUT_MS = 120_000;
 
 const systemInstruction = [
   "Convert the user's trading research question into one Experiment JSON object. Output only schema-matching data, with no advice, predictions, reasoning, markdown, or commentary.",
-  "Do not invent important values. Use null for absent scalar fields and list important absences in missingFields. Preserve ambiguous wording such as sharp fall; never invent a numeric threshold. Use filters for explicit constraints such as volatility. Mark each source as user, inferred, or missing.",
+  "Do not invent important values. Use null for absent scalar fields and list important absences in missingFields. Preserve ambiguous wording such as sharp fall; never invent a numeric threshold. Infer timeframe as Daily when the question explicitly refers to trading days or consecutive days. Use filters for explicit constraints such as volatility. For wording such as have an edge, infer an objective about whether the strategy has a positive edge without adding unrelated filters. For wording about recovery, infer an objective specifically about whether or how the instrument recovers after the stated condition. Mark each source as user, inferred, or missing.",
 ].join("\n");
 
 export type StructureExperimentErrorCode =

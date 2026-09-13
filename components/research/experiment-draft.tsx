@@ -23,12 +23,13 @@ const fieldDefinitions: Array<{ key: ExperimentField; label: string }> = [
 
 const sourceStyles: Record<FieldSource, string> = {
   user: "border-slate-700 bg-slate-800/70 text-slate-300",
+  clarified: "border-cyan-400/20 bg-cyan-400/10 text-cyan-200",
   inferred: "border-amber-400/20 bg-amber-400/10 text-amber-200",
   missing: "border-slate-700/70 bg-slate-950/40 text-slate-500",
 };
 
 function FieldSourceBadge({ source }: { source: FieldSource }) {
-  const label = source === "user" ? "User provided" : source === "inferred" ? "Inferred" : "Missing";
+  const label = source === "user" ? "User provided" : source === "clarified" ? "Clarified" : source === "inferred" ? "Inferred" : "Missing";
 
   return <Badge className={sourceStyles[source]}>{label}</Badge>;
 }

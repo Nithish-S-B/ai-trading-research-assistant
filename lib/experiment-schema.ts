@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const fieldSourceSchema = z.enum(["user", "inferred", "missing"]);
+const fieldSourceSchema = z.enum(["user", "clarified", "inferred", "missing"]);
 
 export const experimentSchema = z
   .object({
@@ -58,13 +58,13 @@ export const experimentJsonSchema = {
       type: "object",
       additionalProperties: false,
       properties: {
-        instrument: { type: "string", enum: ["user", "inferred", "missing"] },
-        timeframe: { type: "string", enum: ["user", "inferred", "missing"] },
-        entryCondition: { type: "string", enum: ["user", "inferred", "missing"] },
-        exitCondition: { type: "string", enum: ["user", "inferred", "missing"] },
-        holdingPeriod: { type: "string", enum: ["user", "inferred", "missing"] },
-        filters: { type: "string", enum: ["user", "inferred", "missing"] },
-        objective: { type: "string", enum: ["user", "inferred", "missing"] },
+        instrument: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
+        timeframe: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
+        entryCondition: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
+        exitCondition: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
+        holdingPeriod: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
+        filters: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
+        objective: { type: "string", enum: ["user", "clarified", "inferred", "missing"] },
       },
       required: [
         "instrument",

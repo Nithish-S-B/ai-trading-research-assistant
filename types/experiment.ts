@@ -1,4 +1,4 @@
-export type FieldSource = "user" | "inferred" | "missing";
+export type FieldSource = "user" | "clarified" | "inferred" | "missing";
 
 export type ExperimentField =
   | "instrument"
