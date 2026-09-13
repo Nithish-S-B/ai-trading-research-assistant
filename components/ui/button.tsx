@@ -7,6 +7,8 @@ const buttonVariants = {
     "bg-cyan-400 text-slate-950 hover:bg-cyan-300 focus-visible:ring-cyan-300/50",
   outline:
     "border border-slate-700 bg-transparent text-slate-200 hover:bg-slate-800/70 focus-visible:ring-slate-500/50",
+  secondary:
+    "border border-slate-700 bg-slate-800/70 text-slate-200 hover:bg-slate-700/80 focus-visible:ring-slate-500/50",
   ghost:
     "text-slate-400 hover:bg-slate-800/70 hover:text-slate-200 focus-visible:ring-slate-500/50",
 } as const;

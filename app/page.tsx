@@ -9,6 +9,7 @@ import { ClarificationPanel } from "@/components/research/clarification-panel";
 import { ExampleQuestions } from "@/components/research/example-questions";
 import { ExperimentDraft } from "@/components/research/experiment-draft";
 import { ResearchQuestionForm } from "@/components/research/research-question-form";
+import { ResearchProgress, type ResearchStage } from "@/components/research/research-progress";
 
 type FlowState = "idle" | "structuring" | "clarifying" | "updating" | "ready" | "error";
 type ExperimentResponse = { experiment?: Experiment; error?: string };
@@ -23,8 +24,22 @@ export default function HomePage() {
   const [clarificationCycle, setClarificationCycle] = useState(0);
   const [flowState, setFlowState] = useState<FlowState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const requestId = useRef(0);
   const isBusy = flowState === "structuring" || flowState === "updating";
+
+  const currentStage: ResearchStage =
+    flowState === "idle"
+      ? "ask"
+      : flowState === "structuring"
+        ? "structure"
+        : flowState === "error"
+          ? experiment
+            ? "clarify"
+            : "structure"
+          : flowState === "clarifying" || flowState === "updating"
+            ? "clarify"
+            : "ready";
 
   async function fetchClarifications(originalQuestion: string, currentExperiment: Experiment, currentRequestId: number, cycle: number) {
     const response = await fetch("/api/generate-clarifications", {
@@ -51,6 +66,7 @@ export default function HomePage() {
     setAnswers({});
     setClarificationCycle(0);
     setError(null);
+    setCopied(false);
     setFlowState("structuring");
 
     try {
@@ -66,7 +82,7 @@ export default function HomePage() {
       await fetchClarifications(trimmedQuestion, payload.experiment, currentRequestId, 0);
     } catch {
       if (requestId.current === currentRequestId) {
-        setError("Could not prepare clarification questions. Please try again.");
+        setError("Could not structure this experiment. Please try again.");
         setFlowState("error");
       }
     }
@@ -118,7 +134,30 @@ export default function HomePage() {
     setAnswers({});
     setClarificationCycle(0);
     setError(null);
+    setCopied(false);
     setFlowState("idle");
+  }
+
+  async function handleCopy() {
+    if (!experiment) return;
+
+    const summary = [
+      `Instrument: ${experiment.instrument ?? "Not specified"}`,
+      `Timeframe: ${experiment.timeframe ?? "Not specified"}`,
+      `Entry Condition: ${experiment.entryCondition ?? "Not specified"}`,
+      `Exit Condition: ${experiment.exitCondition ?? "Not specified"}`,
+      `Holding Period: ${experiment.holdingPeriod ?? "Not specified"}`,
+      `Filters: ${experiment.filters.length > 0 ? experiment.filters.join(", ") : "None"}`,
+      `Objective: ${experiment.objective ?? "Not specified"}`,
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setError("Could not copy the experiment. Please try again.");
+    }
   }
 
   return (
@@ -130,11 +169,12 @@ export default function HomePage() {
         <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-slate-400 sm:text-lg sm:leading-8">Describe a trading idea in plain English. ResearchLab helps structure it into a clear experiment before testing.</p>
       </section>
       <div className="mt-12 space-y-10 sm:mt-16 sm:space-y-12">
+        <ResearchProgress currentStage={currentStage} />
         <ResearchQuestionForm hasSubmittedQuestion={submittedQuestion !== null} isLoading={isBusy} error={error} onClear={handleClear} onQuestionChange={setQuestion} onSubmit={handleSubmit} question={question} />
         <ExampleQuestions onSelect={setQuestion} />
         {submittedQuestion ? (
           <>
-            <ExperimentDraft error={error} experiment={experiment} isLoading={flowState === "structuring"} question={submittedQuestion} />
+            <ExperimentDraft copied={copied} clarificationCount={Object.values(answers).filter((answer) => answer.trim()).length} error={error} experiment={experiment} isLoading={flowState === "structuring"} isReady={flowState === "ready"} onCopy={handleCopy} onStartNew={handleClear} question={submittedQuestion} />
             {experiment && clarifications.length > 0 && flowState !== "structuring" ? (
               <ClarificationPanel answers={answers} isUpdating={flowState === "updating"} onAnswerChange={(id, answer) => { setAnswers((previous) => ({ ...previous, [id]: answer })); setError(null); }} onUpdate={handleUpdate} questions={clarifications} />
             ) : null}

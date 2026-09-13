@@ -6,8 +6,8 @@ import { AppHeader } from "@/components/layout/app-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ResearchLab | AI Trading Research Assistant",
-  description: "Turn market ideas into clear, testable trading experiments.",
+  title: "ResearchLab — AI Trading Research Assistant",
+  description: "Turn natural-language trading ideas into structured, testable research experiments.",
 };
 
 type RootLayoutProps = Readonly<{

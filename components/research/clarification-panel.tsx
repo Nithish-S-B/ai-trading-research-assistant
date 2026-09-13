@@ -23,7 +23,9 @@ export function ClarificationPanel({ questions, answers, isUpdating, onAnswerCha
           A few details to make this testable
         </CardTitle>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          These are the smallest missing decisions needed to turn the idea into a clear experiment.
+          {isUpdating
+            ? "Updating the experiment..."
+            : "Identifying important missing details before the experiment is ready."}
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
