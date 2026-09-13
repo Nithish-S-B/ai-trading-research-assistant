@@ -17,6 +17,7 @@ const systemInstruction = [
   "Preserve all existing supported values unless an answer explicitly changes them. Mark answer-derived fields as clarified, safely derived fields as inferred, and unresolved fields as missing.",
   "Do not invent thresholds, exits, holding periods, timeframes, or other values that are not explicit in the question, experiment, or answers. Keep missingFields accurate.",
   "Do not introduce information that does not exist in the current research question, current experiment, or user clarification answers. Never import values from examples, prior requests, or unrelated context; in particular, do not introduce filters or objectives that are absent from the current inputs.",
+  "When the user answers the combined exit question with a holding period, use that answer to populate the holdingPeriod and the corresponding time-based exitCondition when appropriate. Do not create extra strategy rules.",
 ].join("\n");
 
 function createTimeout() {
@@ -109,5 +110,29 @@ export async function applyClarifications(input: {
     );
   }
 
-  return validated.data;
+  return inferDailyTimeframe(validated.data, input);
+}
+
+function inferDailyTimeframe(
+  experiment: ValidatedExperiment,
+  input: {
+    question: string;
+    answers: Record<string, string>;
+  },
+): ValidatedExperiment {
+  if (
+    experiment.timeframe !== null ||
+    !Object.values(input.answers).some((answer) =>
+      /\b(one\s+)?trading\s+day(s)?\b|\bdaily\b/i.test(answer),
+    )
+  ) {
+    return experiment;
+  }
+
+  return {
+    ...experiment,
+    timeframe: "Daily",
+    missingFields: experiment.missingFields.filter((field) => field !== "timeframe"),
+    sources: { ...experiment.sources, timeframe: "inferred" },
+  };
 }
