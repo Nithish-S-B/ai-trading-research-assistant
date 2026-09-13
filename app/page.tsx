@@ -1,13 +1,32 @@
+"use client";
+
+import { useState } from "react";
 import { FlaskConical } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ExampleQuestions } from "@/components/research/example-questions";
+import { ExperimentDraft } from "@/components/research/experiment-draft";
+import { ResearchQuestionForm } from "@/components/research/research-question-form";
 
 export default function HomePage() {
+  const [question, setQuestion] = useState("");
+  const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(null);
+
+  function handleSubmit() {
+    const trimmedQuestion = question.trim();
+
+    if (!trimmedQuestion) {
+      return;
+    }
+
+    setQuestion(trimmedQuestion);
+    setSubmittedQuestion(trimmedQuestion);
+  }
+
+  function handleClear() {
+    setQuestion("");
+    setSubmittedQuestion(null);
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-16 sm:px-8 sm:py-24 lg:px-10">
       <section aria-labelledby="page-title" className="max-w-3xl">
@@ -29,20 +48,17 @@ export default function HomePage() {
         </p>
       </section>
 
-      <section aria-labelledby="research-question-title" className="mt-12 sm:mt-16">
-        <Card>
-          <CardHeader>
-            <CardTitle id="research-question-title">Research Question</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex min-h-40 items-center justify-center rounded-xl border border-dashed border-slate-700/80 bg-slate-950/35 px-6 text-center">
-              <p className="text-sm leading-6 text-slate-500">
-                Question input will be implemented in the next milestone.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+      <div className="mt-12 space-y-10 sm:mt-16 sm:space-y-12">
+        <ResearchQuestionForm
+          hasSubmittedQuestion={submittedQuestion !== null}
+          onClear={handleClear}
+          onQuestionChange={setQuestion}
+          onSubmit={handleSubmit}
+          question={question}
+        />
+        <ExampleQuestions onSelect={setQuestion} />
+        {submittedQuestion ? <ExperimentDraft question={submittedQuestion} /> : null}
+      </div>
     </main>
   );
 }
