@@ -1,7 +1,7 @@
 import { FlaskConical, Moon } from "lucide-react";
 
-import { Badge } from "@/ui/badge";
-import { Button } from "@/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function AppHeader() {
   return (
