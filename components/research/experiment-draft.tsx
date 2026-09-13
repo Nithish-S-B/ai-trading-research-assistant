@@ -40,9 +40,13 @@ function FieldSourceBadge({ source }: { source: FieldSource }) {
   return <Badge className={sourceStyles[source]}>{label}</Badge>;
 }
 
-function displayFieldValue(experiment: Experiment, field: ExperimentField) {
+function displayFieldValue(experiment: Experiment, field: ExperimentField, isReady: boolean) {
   if (field === "filters") {
-    return experiment.filters.length > 0 ? experiment.filters.join(", ") : null;
+    if (experiment.filters.length > 0) {
+      return experiment.filters.join(", ");
+    }
+
+    return isReady ? "None" : null;
   }
 
   return experiment[field];
@@ -127,7 +131,8 @@ export function ExperimentDraft({
 
             <dl className="divide-y divide-slate-800/80">
               {fieldDefinitions.map(({ key, label }) => {
-                const value = displayFieldValue(experiment, key);
+                const value = displayFieldValue(experiment, key, isReady);
+                const isOptionalReadyFilter = isReady && key === "filters" && experiment.filters.length === 0;
 
                 return (
                   <div
@@ -139,7 +144,7 @@ export function ExperimentDraft({
                       {value || "Not specified"}
                     </dd>
                     <div className="sm:justify-self-end">
-                      <FieldSourceBadge source={experiment.sources[key]} />
+                      {isOptionalReadyFilter ? null : <FieldSourceBadge source={experiment.sources[key]} />}
                     </div>
                   </div>
                 );
