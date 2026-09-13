@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FlaskConical } from "lucide-react";
 
+import type { Experiment } from "@/types/experiment";
 import { ExampleQuestions } from "@/components/research/example-questions";
 import { ExperimentDraft } from "@/components/research/experiment-draft";
 import { ResearchQuestionForm } from "@/components/research/research-question-form";
@@ -10,21 +11,61 @@ import { ResearchQuestionForm } from "@/components/research/research-question-fo
 export default function HomePage() {
   const [question, setQuestion] = useState("");
   const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(null);
+  const [experiment, setExperiment] = useState<Experiment | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const trimmedQuestion = question.trim();
 
-    if (!trimmedQuestion) {
+    if (!trimmedQuestion || isLoading) {
       return;
     }
 
+    const currentRequestId = ++requestId.current;
     setQuestion(trimmedQuestion);
     setSubmittedQuestion(trimmedQuestion);
+    setExperiment(null);
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/structure-experiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: trimmedQuestion }),
+      });
+      const payload = (await response.json()) as {
+        experiment?: Experiment;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.experiment) {
+        throw new Error(payload.error || "Experiment structuring failed.");
+      }
+
+      if (requestId.current === currentRequestId) {
+        setExperiment(payload.experiment);
+      }
+    } catch {
+      if (requestId.current === currentRequestId) {
+        setError("Could not structure this experiment. Please try again.");
+      }
+    } finally {
+      if (requestId.current === currentRequestId) {
+        setIsLoading(false);
+      }
+    }
   }
 
   function handleClear() {
+    requestId.current += 1;
     setQuestion("");
     setSubmittedQuestion(null);
+    setExperiment(null);
+    setError(null);
+    setIsLoading(false);
   }
 
   return (
@@ -51,13 +92,22 @@ export default function HomePage() {
       <div className="mt-12 space-y-10 sm:mt-16 sm:space-y-12">
         <ResearchQuestionForm
           hasSubmittedQuestion={submittedQuestion !== null}
+          isLoading={isLoading}
+          error={error}
           onClear={handleClear}
           onQuestionChange={setQuestion}
           onSubmit={handleSubmit}
           question={question}
         />
         <ExampleQuestions onSelect={setQuestion} />
-        {submittedQuestion ? <ExperimentDraft question={submittedQuestion} /> : null}
+        {submittedQuestion ? (
+          <ExperimentDraft
+            error={error}
+            experiment={experiment}
+            isLoading={isLoading}
+            question={submittedQuestion}
+          />
+        ) : null}
       </div>
     </main>
   );

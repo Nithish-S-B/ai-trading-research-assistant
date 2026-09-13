@@ -1,10 +1,12 @@
-import { ArrowRight, RotateCcw } from "lucide-react";
+import { AlertCircle, ArrowRight, LoaderCircle, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ResearchQuestionFormProps = {
   hasSubmittedQuestion: boolean;
+  isLoading: boolean;
+  error: string | null;
   onClear: () => void;
   onQuestionChange: (question: string) => void;
   onSubmit: () => void;
@@ -13,6 +15,8 @@ type ResearchQuestionFormProps = {
 
 export function ResearchQuestionForm({
   hasSubmittedQuestion,
+  isLoading,
+  error,
   onClear,
   onQuestionChange,
   onSubmit,
@@ -62,12 +66,31 @@ export function ResearchQuestionForm({
                   Clear
                 </Button>
               ) : null}
-              <Button disabled={isBlank} type="submit">
-                Structure Experiment
-                <ArrowRight aria-hidden="true" className="size-4" />
+              <Button disabled={isBlank || isLoading} type="submit">
+                {isLoading ? (
+                  <>
+                    <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                    Structuring...
+                  </>
+                ) : (
+                  <>
+                    Structure Experiment
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </>
+                )}
               </Button>
             </div>
           </div>
+          {error ? (
+            <div
+              aria-live="polite"
+              className="mt-4 flex items-center gap-2 rounded-lg border border-rose-400/20 bg-rose-400/[0.05] px-3 py-2.5 text-sm text-rose-200"
+              role="alert"
+            >
+              <AlertCircle aria-hidden="true" className="size-4 shrink-0" />
+              {error}
+            </div>
+          ) : null}
         </form>
       </CardContent>
     </Card>

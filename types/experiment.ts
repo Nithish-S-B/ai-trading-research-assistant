@@ -1,3 +1,16 @@
+export type FieldSource = "user" | "inferred" | "missing";
+
+export type ExperimentField =
+  | "instrument"
+  | "timeframe"
+  | "entryCondition"
+  | "exitCondition"
+  | "holdingPeriod"
+  | "filters"
+  | "objective";
+
+export type ExperimentSources = Record<ExperimentField, FieldSource>;
+
 export type Experiment = {
   instrument: string | null;
   timeframe: string | null;
@@ -6,4 +19,6 @@ export type Experiment = {
   holdingPeriod: string | null;
   filters: string[];
   objective: string | null;
+  missingFields: string[];
+  sources: ExperimentSources;
 };
